@@ -33,9 +33,6 @@ setInterval(function() {
 
 
 http.createServer(function(request, response){
-
-    // response.setHeader("UserId", 12);
-    // response.setHeader("Content-Type", "text/html; charset=utf-8;");
     response.write(JSON.stringify({playerCount : playerCount, serverCount : serverCount}));
     response.end();
 }).listen(3000);
