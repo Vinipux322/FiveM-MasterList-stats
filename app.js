@@ -32,39 +32,43 @@ setInterval(function() {
 
       // The whole response has been received. Print out the result.
       resp.on('end', () => {
-        let newPlayerCount = 0;
-        let newServerCount = 0;
-        let newData = JSON.parse(data)
-        for (item of newData) {
-          if (!serverData[item.EndPoint])
-            serverData[item.EndPoint] = {};
-          if (!serverData[item.EndPoint].data)
-            serverData[item.EndPoint].data = {};
-          if (!serverData[item.EndPoint].data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`])
-            serverData[item.EndPoint].data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`] = [];
-          serverData[item.EndPoint].playerCount = item.Data.clients;
-          serverData[item.EndPoint].data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].push(item.Data.clients)
+        try {
+          let newPlayerCount = 0;
+          let newServerCount = 0;
+          let newData = JSON.parse(data)
+          for (item of newData) {
+            if (!serverData[item.EndPoint])
+              serverData[item.EndPoint] = {};
+            if (!serverData[item.EndPoint].data)
+              serverData[item.EndPoint].data = {};
+            if (!serverData[item.EndPoint].data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`])
+              serverData[item.EndPoint].data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`] = [];
+            serverData[item.EndPoint].playerCount = item.Data.clients;
+            serverData[item.EndPoint].data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].push(item.Data.clients)
 
-          newPlayerCount = newPlayerCount + item.Data.clients;
-          newServerCount++;
-        };
+            newPlayerCount = newPlayerCount + item.Data.clients;
+            newServerCount++;
+          };
 
-        if (!serverData.fivem)
-          serverData.fivem = {};
-        if (!serverData.fivem.data)
-          serverData.fivem.data = {};
-        if (!serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`])
-          serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`] = {};
-        if (!serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount) {
-            serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount = [];
-            serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].serverCount = [];
+          if (!serverData.fivem)
+            serverData.fivem = {};
+          if (!serverData.fivem.data)
+            serverData.fivem.data = {};
+          if (!serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`])
+            serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`] = {};
+          if (!serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount) {
+              serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount = [];
+              serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].serverCount = [];
+          }
+          serverData.fivem.playerCount = newPlayerCount;
+          serverData.fivem.serverCount = newServerCount;
+          serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount.push(newPlayerCount);
+          serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].serverCount.push(newServerCount);
+
+          console.log(serverData.fivem.playerCount, serverData.fivem.serverCount)
+        } catch(e) {
+          console.log(e)
         }
-        serverData.fivem.playerCount = newPlayerCount;
-        serverData.fivem.serverCount = newServerCount;
-        serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount.push(newPlayerCount);
-        serverData.fivem.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].serverCount.push(newServerCount);
-
-        console.log(serverData.fivem.playerCount, serverData.fivem.serverCount)
       });
 
     }).on("error", (err) => {
@@ -106,8 +110,10 @@ http.createServer(function(request, response){
       PastData.setDate(PastData.getDate() - 1);
       if (serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`]) {
         serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`].playerCount.forEach(item => {
-          averageNumberOfPlayersYesterday = averageNumberOfPlayersYesterday + item;
-          averageYesterdayNumberPlayersCount++;
+          if (item > 100) { // Иногда мастер лист падает и выдает неверные данные, мы эту статистику не берем
+            averageNumberOfPlayersYesterday = averageNumberOfPlayersYesterday + item;
+            averageYesterdayNumberPlayersCount++;
+          }
         });
       }
 
@@ -117,8 +123,10 @@ http.createServer(function(request, response){
       let averageTodayNumberPlayersCount = 0;
       if (serverLocalData.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`]) {
         serverLocalData.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].playerCount.forEach(item => {
-          averageNumberOfPlayersToday = averageNumberOfPlayersToday + item;
-          averageTodayNumberPlayersCount++;
+          if (item > 100) { // Иногда мастер лист падает и выдает неверные данные, мы эту статистику не берем
+            averageNumberOfPlayersToday = averageNumberOfPlayersToday + item;
+            averageTodayNumberPlayersCount++;
+          }
         });
       }
 
@@ -136,8 +144,10 @@ http.createServer(function(request, response){
       PastData.setDate(PastData.getDate() - 1);
       if (serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`]) {
         serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`].serverCount.forEach(item => {
-          averageNumberOfServersYesterday = averageNumberOfServersYesterday + item;
-          averageYesterdayNumberServerCount++;
+          if (item > 1) { // Иногда мастер лист падает и выдает неверные данные, мы эту статистику не берем
+            averageNumberOfServersYesterday = averageNumberOfServersYesterday + item;
+            averageYesterdayNumberServerCount++;
+          }
         });
       }
 
@@ -147,8 +157,10 @@ http.createServer(function(request, response){
       let averageTodayNumberServersCount = 0;
       if (serverLocalData.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`]) {
         serverLocalData.data[`${Data.getDate()}.${Data.getMonth()}.${Data.getFullYear()}`].serverCount.forEach(item => {
-          averageNumberOfServersToday = averageNumberOfServersToday + item;
-          averageTodayNumberServersCount++;
+          if (item > 1) { // Иногда мастер лист падает и выдает неверные данные, мы эту статистику не берем
+            averageNumberOfServersToday = averageNumberOfServersToday + item;
+            averageTodayNumberServersCount++;
+          }
         });
       }
 
@@ -177,7 +189,7 @@ http.createServer(function(request, response){
         if (serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`]) {
           serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`].forEach(item => {
             averageNumberOfPlayersYesterday = averageNumberOfPlayersYesterday + item;
-            averageNumberCount++;
+            averageYesterdayNumberCount++;
           });
         }
 
