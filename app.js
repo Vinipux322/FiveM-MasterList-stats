@@ -4,6 +4,9 @@ const fs = require("fs");
 
 let serverData
 
+let cacheTiming = 60000
+let saveTiming = 3600000
+
 fs.access(`stats.json`, function(error){
     if (error) {
         console.log("Файл со статистикой не найден, создаем..");
@@ -78,14 +81,14 @@ setInterval(function() {
   } catch(e) {
     console.log(e);
   }
-}, 60000)
+}, cacheTiming)
 
 setInterval(function() {
   fs.writeFile('stats.json', JSON.stringify(serverData), (err) => {
     if(err) throw err;
     console.log('Данные о статистике серверов сохранены');
   });
-}, 3600000)
+}, saveTiming)
 
 // 60000
 // 3600000
