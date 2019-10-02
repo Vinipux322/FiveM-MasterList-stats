@@ -4,7 +4,7 @@ const fs = require("fs");
 
 let serverData
 
-let cacheTiming = 60000
+let cacheTiming = 900000
 let saveTiming = 3600000
 
 fs.access(`stats.json`, function(error){
@@ -109,7 +109,7 @@ http.createServer(function(request, response){
       }
       let averageNumberOfPlayersYesterday = 0;
       let averageYesterdayNumberPlayersCount = 0;
-      var PastData = new Date(Data.getFullYear(), Data.getDate(), Data.getMonth());
+      var PastData = new Date(Data.getFullYear(), Data.getMonth(), Data.getDate());
       PastData.setDate(PastData.getDate() - 1);
       if (serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`]) {
         serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`].playerCount.forEach(item => {
@@ -143,7 +143,7 @@ http.createServer(function(request, response){
 
       let averageNumberOfServersYesterday = 0;
       let averageYesterdayNumberServerCount = 0;
-      var PastData = new Date(Data.getFullYear(), Data.getDate(), Data.getMonth());
+      var PastData = new Date(Data.getFullYear(), Data.getMonth(), Data.getDate());
       PastData.setDate(PastData.getDate() - 1);
       if (serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`]) {
         serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`].serverCount.forEach(item => {
@@ -171,7 +171,7 @@ http.createServer(function(request, response){
 
       gainServersForToday = (averageNumberOfServersToday*100/averageNumberOfServersYesterday)-100
 
-      response.write(JSON.stringify({playerCount : serverLocalData.playerCount, serverCount : serverLocalData.serverCount, highestPlayerCountToday : highestPlayerCountToday, gainPlayersForToday : gainPlayersForToday, gainServersForToday : gainServersForToday}));
+      response.write(JSON.stringify({playerCount : serverLocalData.playerCount, serverCount : serverLocalData.serverCount, highestPlayerCountToday : highestPlayerCountToday, gainPlayersForToday : `${gainPlayersForToday.toFixed()}%`, gainServersForToday : `${gainServersForToday.toFixed()}%`}));
     } else if (request.url.split('/')[1] === 'getServerData') {
       if (serverData[request.url.split('/')[2]]) {
         var Data = new Date();
@@ -187,7 +187,7 @@ http.createServer(function(request, response){
         }
         let averageNumberOfPlayersYesterday = 0;
         let averageYesterdayNumberCount = 0;
-        var PastData = new Date(Data.getFullYear(), Data.getDate(), Data.getMonth());
+        var PastData = new Date(Data.getFullYear(), Data.getMonth(), Data.getDate());
         PastData.setDate(PastData.getDate() - 1);
         if (serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`]) {
           serverLocalData.data[`${PastData.getDate()}.${PastData.getMonth()}.${PastData.getFullYear()}`].forEach(item => {
@@ -211,7 +211,7 @@ http.createServer(function(request, response){
 
         gainForToday = (averageNumberOfPlayersToday*100/averageNumberOfPlayersYesterday)-100
 
-        response.write(JSON.stringify({playerCount : serverLocalData.playerCount, highestPlayerCountToday : highestPlayerCountToday, gainForToday : gainForToday}));
+        response.write(JSON.stringify({playerCount : serverLocalData.playerCount, highestPlayerCountToday : highestPlayerCountToday, gainForToday : `${gainForToday.toFixed()}%`}));
       } else {
         response.write('You entered the wrong IP');
       }
