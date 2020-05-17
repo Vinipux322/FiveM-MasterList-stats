@@ -2,23 +2,31 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 
-let serverData
+let serverData = {}
 
 let cacheTiming = 900000
+// let cacheTiming = 60000
 let saveTiming = 3600000
 
-fs.access(`stats.json`, function(error){
-    if (error) {
-        console.log("Файл со статистикой не найден, создаем..");
-        fs.writeFile('stats.json', '{}', (err) => {
-          if(err) throw err;
-          console.log('Файл со статистикой создан');
-          serverData = JSON.parse(fs.readFileSync("stats.json", "utf8"));
-        });
-    } else {
-      serverData = JSON.parse(fs.readFileSync("stats.json", "utf8"));
-    }
-});
+// fs.access(`stats.json`, function(error){
+//     if (error) {
+//         console.log("Файл со статистикой не найден, создаем..");
+//         fs.writeFile('stats.json', '{}', (err) => {
+//           if(err) throw err;
+//           console.log('Файл со статистикой создан');
+//           serverData = JSON.parse(fs.readFileSync("stats.json", "utf8"));
+//         });
+//     } else {
+//       serverData = JSON.parse(fs.readFileSync("stats.json", "utf8"));
+//     }
+// });
+
+fs.readdir('logsJson', function( err, files ) {
+    files.forEach(function(file, index) {
+      console.log(file)
+      serverData[file.replace('.json', '')] = JSON.parse(fs.readFileSync(`logsJson/${file}`, "utf8"));
+    })
+})
 
 setInterval(function() {
   try {
@@ -84,11 +92,20 @@ setInterval(function() {
 }, cacheTiming)
 
 setInterval(function() {
-  fs.writeFile('stats.json', JSON.stringify(serverData), (err) => {
-    if(err) throw err;
-    console.log('Данные о статистике серверов сохранены');
-  });
+  for (var items of Object.entries(serverData)) {
+    fs.writeFile(`logsJson/${items[0]}.json`, JSON.stringify(items[1]), (err) => {
+      if(err) throw err;
+      console.log(`Данные о статистике серверов сохранены ${items[0]}`);
+    });
+  }
 }, saveTiming)
+
+// setInterval(function() {
+//   fs.writeFile('stats.json', JSON.stringify(serverData), (err) => {
+//     if(err) throw err;
+//     console.log('Данные о статистике серверов сохранены');
+//   });
+// }, saveTiming)
 
 // 60000
 // 3600000
